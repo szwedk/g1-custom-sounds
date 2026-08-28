@@ -1,0 +1,29 @@
+# Local configuration: API keys, robot address
+voice/config.sh
+
+# Rendered audio (regenerate with scripts/generate_voices.sh)
+voice/generated/*.wav
+
+# Runtime logs and working output
+voice/deploy-log.txt
+scan-results/
+backups/
+replacement-audio/
+
+# Voice Studio runtime data
+voice/library/
+voice/app/state/
+voice/app/assets/
+voice/app/simulated_robot/
+
+# OS cruft
+.DS_Store
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Editor and tooling
+.claude/
+.vscode/
+.idea/

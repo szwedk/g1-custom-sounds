@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G1 Voice Studio</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#ffffff; --line:#e4e6ea; --ink:#16181d; --mut:#7a8088;
+    --accent:#2f6bff; --accent-ink:#ffffff; --ok:#0fa36b; --warn:#d97706; --bad:#dc2626;
+    --knob:#1b1e26; --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0}
+  html,body{height:100%}
+  body{
+    font:14px/1.45 -apple-system,'SF Pro Text','Segoe UI',Inter,system-ui,sans-serif;
+    background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1060px; margin:0 auto; padding:28px 22px 60px}
+
+  /* header */
+  header{display:flex; align-items:center; gap:14px; margin-bottom:26px}
+  .logo{width:34px;height:34px;border-radius:9px;background:var(--knob);display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;letter-spacing:.5px}
+  h1{font-size:17px; font-weight:650; letter-spacing:-.01em}
+  .sub{color:var(--mut); font-size:12px; margin-top:1px}
+  .spacer{flex:1}
+  .pill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;
+    background:var(--card);border:1px solid var(--line);font-size:12px;color:var(--mut)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--warn)}
+  .dot.ok{background:var(--ok)} .dot.sim{background:var(--accent)}
+
+  /* layout */
+  .grid{display:grid; grid-template-columns:1fr 1fr 300px; gap:16px}
+  @media(max-width:960px){.grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px}
+  .card h2{font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--mut); margin-bottom:14px}
+  .full{grid-column:1/-1}
+
+  /* controls */
+  textarea,input[type=text]{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+    font:inherit; color:var(--ink); background:#fbfbfc; outline:none; resize:vertical;
+  }
+  textarea:focus,input[type=text]:focus{border-color:var(--accent); background:#fff}
+  textarea{min-height:84px}
+  .row{display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap}
+  button{
+    font:inherit; font-weight:560; border:1px solid var(--line); background:var(--card);
+    color:var(--ink); padding:8px 14px; border-radius:10px; cursor:pointer; transition:.12s;
+    display:inline-flex; align-items:center; gap:7px;
+  }
+  button:hover{border-color:#c9cdd4; background:#f7f8fa}
+  button:disabled{opacity:.45; cursor:default}
+  button.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+  button.primary:hover{filter:brightness(1.07)}
+  button.danger{color:var(--bad)}
+  button.small{padding:5px 10px; font-size:12.5px; border-radius:8px}
+  select{font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:var(--card)}
+  .hint{font-size:12px; color:var(--mut); margin-top:8px}
+  .hint b{color:var(--ink); font-weight:600}
+
+  /* knob */
+  .knobwrap{display:flex; flex-direction:column; align-items:center; gap:12px}
+  #knob{touch-action:none; cursor:grab; user-select:none}
+  #knob:active{cursor:grabbing}
+  .knob-val{font-size:26px; font-weight:650; letter-spacing:-.02em}
+  .knob-val small{font-size:12px; color:var(--mut); font-weight:500}
+
+  /* record */
+  .recbtn{
+    width:64px;height:64px;border-radius:50%;border:1px solid var(--line);
+    display:grid;place-items:center;background:#fff;cursor:pointer;transition:.15s; padding:0;
+  }
+  .recbtn .core{width:22px;height:22px;border-radius:50%;background:var(--bad);transition:.18s}
+  .recbtn.on{border-color:var(--bad); box-shadow:0 0 0 5px rgba(220,38,38,.12)}
+  .recbtn.on .core{border-radius:5px; width:18px; height:18px}
+  .meter{display:flex; gap:3px; align-items:flex-end; height:34px}
+  .meter i{width:5px; background:#dfe2e7; border-radius:2px; height:5px; transition:height .06s}
+  .rec-time{font-variant-numeric:tabular-nums; color:var(--mut); font-size:13px}
+  audio{width:100%; height:34px; margin-top:10px}
+
+  /* library */
+  .lib-head{display:flex; align-items:center; margin-bottom:12px}
+  .lib-head h2{margin:0}
+  .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px}
+  .sound{
+    border:1px solid var(--line); border-radius:12px; padding:12px 12px 10px; background:#fbfbfc;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .sound .name{font-weight:600; font-size:13.5px; word-break:break-all}
+  .sound .meta{font-size:11.5px; color:var(--mut); display:flex; gap:8px; align-items:center}
+  .tag{font-size:10px; font-weight:650; letter-spacing:.06em; padding:2px 7px; border-radius:6px; text-transform:uppercase}
+  .tag.prompt{background:#eef2ff; color:#4854c9}
+  .tag.g1{background:#e8f7f0; color:var(--ok)}
+  .sound .acts{display:flex; gap:6px; flex-wrap:wrap}
+  .empty{color:var(--mut); font-size:13px; padding:18px 4px}
+
+  /* toast */
+  #toasts{position:fixed; bottom:22px; right:22px; display:flex; flex-direction:column; gap:8px; z-index:50}
+  .toast{background:var(--knob); color:#fff; padding:10px 15px; border-radius:10px; font-size:13px;
+    box-shadow:0 8px 24px rgba(0,0,0,.18); opacity:0; transform:translateY(6px); transition:.25s; max-width:380px}
+  .toast.show{opacity:1; transform:none}
+  .toast.err{background:var(--bad)}
+  .toast.ok{background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">G1</div>
+    <div>
+      <h1>Voice Studio</h1>
+      <div class="sub">Unitree G1 · custom sounds, speech &amp; speaker control</div>
+    </div>
+    <div class="spacer"></div>
+    <span class="pill"><span class="dot" id="statusDot"></span><span id="statusText">connecting…</span></span>
+  </header>
+
+  <div class="grid">
+    <!-- TTS -->
+    <section class="card">
+      <h2>Text to Speech</h2>
+      <textarea id="ttsText" placeholder="Type what the robot should say…">Hello, I am online and ready.</textarea>
+      <div class="row">
+        <select id="ttsSpeaker">
+          <option value="1" selected>English voice</option>
+          <option value="0">Chinese voice</option>
+        </select>
+        <button class="primary" id="btnSpeak">Speak on G1</button>
+      </div>
+      <div class="row">
+        <input type="text" id="genName" placeholder="save as… (e.g. greeting)" style="flex:1">
+        <button id="btnGenerate">Generate &amp; Save</button>
+      </div>
+      <div class="hint" id="ttsHint"><b>Speak</b> uses the robot's built-in voice. <b>Generate</b> renders with ElevenLabs into the library.</div>
+    </section>
+
+    <!-- Record -->
+    <section class="card">
+      <h2>Record</h2>
+      <div class="row" style="margin-top:2px">
+        <button class="recbtn" id="btnRec" title="record"><span class="core"></span></button>
+        <div style="flex:1">
+          <div class="meter" id="meter"></div>
+          <div class="rec-time" id="recTime">0:00.0</div>
+        </div>
+      </div>
+      <audio id="recPreview" controls style="display:none"></audio>
+      <div class="row" id="recSaveRow" style="display:none">
+        <input type="text" id="recName" placeholder="sound name…" style="flex:1">
+        <button class="primary" id="btnRecSave">Save</button>
+        <button id="btnRecDiscard">Discard</button>
+      </div>
+      <div class="hint">Recordings are converted to the G1's format automatically (16&nbsp;kHz · mono · 16-bit).</div>
+    </section>
+
+    <!-- Volume -->
+    <section class="card">
+      <h2>Speaker</h2>
+      <div class="knobwrap">
+        <svg id="knob" width="132" height="132" viewBox="0 0 132 132">
+          <circle cx="66" cy="66" r="56" fill="var(--knob)"/>
+          <path id="knobTrack" fill="none" stroke="#3a3f4d" stroke-width="6" stroke-linecap="round"/>
+          <path id="knobArc" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round"/>
+          <line id="knobNeedle" x1="66" y1="66" x2="66" y2="26" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="66" cy="66" r="7" fill="#fff" opacity=".9"/>
+        </svg>
+        <div class="knob-val"><span id="volVal">85</span><small> / 100</small></div>
+        <div id="boostTag" style="display:none; font-size:11px; font-weight:700; letter-spacing:.06em; color:#d97706; margin-top:-6px">⚡ BOOST <span id="boostX"></span></div>
+        <button id="btnTone" style="width:100%; justify-content:center">Test chest speaker</button>
+        <div id="syncBox" style="display:none; width:100%; margin-top:14px; border-top:1px solid var(--line); padding-top:12px">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--mut); margin-bottom:7px">
+            <span>Internal + USB sync</span><span id="syncVal" style="font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums">180 ms</span>
+          </div>
+          <input type="range" id="syncSlider" min="-200" max="500" step="5" value="180" style="width:100%">
+          <button id="btnSyncTest" class="small" style="width:100%; justify-content:center; margin-top:8px">▸ Sync test (click train)</button>
+          <div class="hint" style="margin-top:7px">Hit sync test, then drag the slider until the two speakers' clicks merge into one tight tap.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Library -->
+    <section class="card full">
+      <div class="lib-head">
+        <h2>Sound Library</h2>
+        <div class="spacer"></div>
+        <div class="row" style="margin:0">
+          <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.m4a,.ogg" hidden>
+          <button id="btnUpload">Upload sound</button>
+          <button class="primary" id="btnPushAll">Save all to G1</button>
+        </div>
+      </div>
+      <div class="cards" id="libCards"></div>
+      <div class="hint" id="libHint"></div>
+    </section>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const api = async (path, opts={}) => {
+  const r = await fetch(path, opts);
+  const j = await r.json().catch(()=>({error:`HTTP ${r.status}`}));
+  if (!r.ok || j.error) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+};
+const jpost = (path, body) => api(path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body||{})});
+
+function toast(msg, cls=''){
+  const t = document.createElement('div');
+  t.className = 'toast '+cls; t.textContent = msg;
+  $('toasts').appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{t.classList.remove('show'); setTimeout(()=>t.remove(), 300)}, 3400);
+}
+const fmtDur = s => s>=60 ? `${Math.floor(s/60)}m ${Math.round(s%60)}s` : `${s.toFixed(1)}s`;
+const fmtSize = b => b>1048576 ? (b/1048576).toFixed(1)+' MB' : Math.round(b/1024)+' KB';
+
+let STATE = null;
+
+/* ---------------- state / library ---------------- */
+async function refresh(){
+  try{
+    STATE = await api('/api/state');
+    const dot = $('statusDot'), txt = $('statusText');
+    const usb = STATE.usb_speaker ? ' · 🔊+USB' : '';
+    if (STATE.simulate){ dot.className='dot sim'; txt.textContent='Simulate mode'; }
+    else if (STATE.on_robot){ dot.className='dot ok'; txt.textContent=`G1 · on-board · ${STATE.iface||'?'}${usb}`; }
+    else { dot.className='dot ok'; txt.textContent=`G1 · ${STATE.robot_ip||'?'} · ${STATE.iface||'?'}${usb}`; }
+    // dual-speaker sync control — only when a USB speaker is attached
+    $('syncBox').style.display = STATE.usb_speaker ? '' : 'none';
+    if (STATE.usb_speaker && document.activeElement !== $('syncSlider') && typeof STATE.sync_ms === 'number'){
+      $('syncSlider').value = STATE.sync_ms; $('syncVal').textContent = STATE.sync_ms + ' ms';
+    }
+    if (STATE.on_robot) {
+      $('ttsHint').innerHTML = STATE.has_elevenlabs
+        ? '<b>Speak</b> and <b>Generate</b> render your ElevenLabs voice and play it on the chest speaker.'
+        : 'This robot’s built-in TTS is silent, so <b>Speak/Generate</b> need an <b>ELEVENLABS_API_KEY</b>. <b>Record</b>, <b>Upload</b>, and playback work now.';
+    } else {
+      $('ttsHint').innerHTML = STATE.has_elevenlabs
+        ? '<b>Speak</b> uses the robot’s built-in voice. <b>Generate</b> renders with ElevenLabs into the library.'
+        : '<b>Speak</b> works now. To <b>Generate &amp; Save</b>, add your ELEVENLABS_API_KEY in voice/config.sh.';
+    }
+    renderLibrary();
+  }catch(e){
+    $('statusDot').className='dot'; $('statusText').textContent='server unreachable';
+  }
+}
+
+function soundCard(src, s){
+  const card = document.createElement('div'); card.className='sound';
+  const tags = [];
+  if (src==='generated') tags.push('<span class="tag prompt">prompt</span>');
+  if (s.pushed) tags.push('<span class="tag g1">on G1</span>');
+  card.innerHTML = `
+    <div class="name"></div>
+    <div class="meta">${fmtDur(s.duration)} · ${fmtSize(s.size)} ${tags.join(' ')}</div>
+    <div class="acts">
+      <button class="small" data-a="preview">▶ Preview</button>
+      <button class="small" data-a="robot">Play on G1</button>
+      <button class="small" data-a="push">${s.pushed?'Re-save':'Save to G1'}</button>
+      ${src==='library' ? '<button class="small danger" data-a="del">✕</button>' : ''}
+    </div>`;
+  // set the filename via textContent — never innerHTML — so a crafted filename can't inject HTML
+  card.querySelector('.name').textContent = s.name.replace(/\.wav$/,'');
+  card.querySelector('[data-a=preview]').onclick = () => {
+    const a = new Audio(`/media/${src}/${encodeURIComponent(s.name)}`); a.play();
+  };
+  card.querySelector('[data-a=robot]').onclick = async (ev) => {
+    try{ await jpost('/api/play', {source:src, name:s.name}); toast(`Playing on G1: ${s.name}`,'ok'); }
+    catch(e){ toast(e.message,'err'); }
+  };
+  card.querySelector('[data-a=push]').onclick = async () => {
+    try{
+      const r = await jpost('/api/push', {items:[{source:src, name:s.name}]});
+      toast(r.message,'ok'); refresh();
+    }catch(e){ toast(e.message,'err'); }
+  };
+  const del = card.querySelector('[data-a=del]');
+  if (del) del.onclick = async () => {
+    if (!confirm(`Delete "${s.name}" from the library?`)) return;
+    try{ await jpost('/api/delete', {name:s.name}); refresh(); } catch(e){ toast(e.message,'err'); }
+  };
+  return card;
+}
+
+function renderLibrary(){
+  const box = $('libCards'); box.innerHTML='';
+  const lib = STATE.sounds.library, gen = STATE.sounds.generated;
+  lib.forEach(s => box.appendChild(soundCard('library', s)));
+  gen.forEach(s => box.appendChild(soundCard('generated', s)));
+  if (!lib.length && !gen.length)
+    box.innerHTML = '<div class="empty">No sounds yet — record one, upload a file, or Generate from text.</div>';
+  $('libHint').innerHTML = `“Save to G1” copies sounds onto the robot’s storage (<b>${STATE.robot_dir}</b>) so they survive reboots.`;
+}
+
+/* ---------------- TTS ---------------- */
+$('btnSpeak').onclick = async () => {
+  const text = $('ttsText').value.trim();
+  if (!text) return toast('Type something first','err');
+  try{
+    $('btnSpeak').disabled = true;
+    await jpost('/api/tts', {text, speaker: +$('ttsSpeaker').value});
+    toast('Speaking on G1','ok');
+  }catch(e){ toast(e.message,'err'); }
+  finally{ $('btnSpeak').disabled = false; }
+};
+$('btnGenerate').onclick = async () => {
+  const text = $('ttsText').value.trim();
+  if (!text) return toast('Type something first','err');
+  try{
+    $('btnGenerate').disabled = true; $('btnGenerate').textContent = 'Generating…';
+    const r = await jpost('/api/generate', {text, name: $('genName').value});
+    toast(`Saved to library: ${r.name}`,'ok'); $('genName').value=''; refresh();
+  }catch(e){ toast(e.message,'err'); }
+  finally{ $('btnGenerate').disabled = false; $('btnGenerate').textContent = 'Generate & Save'; }
+};
+
+/* ---------------- volume knob ---------------- */
+const KNOB = { min:0, max:150, val:85, start:225, sweep:270 }; // 0-100 hardware, 100-150 boost; gap at bottom
+function polar(cx,cy,r,deg){ const a=(deg-90)*Math.PI/180; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; }
+function arcPath(cx,cy,r,a0,a1){
+  const [x0,y0]=polar(cx,cy,r,a0), [x1,y1]=polar(cx,cy,r,a1);
+  const large = (a1-a0)%360 > 180 ? 1 : 0;
+  return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
+}
+function drawKnob(){
+  const frac = (KNOB.val-KNOB.min)/(KNOB.max-KNOB.min);
+  const a0 = KNOB.start, a1 = KNOB.start + KNOB.sweep, av = a0 + frac*KNOB.sweep;
+  $('knobTrack').setAttribute('d', arcPath(66,66,48,a0,a1));
+  if (frac>0.005) { $('knobArc').setAttribute('d', arcPath(66,66,48,a0,av)); $('knobArc').style.display=''; }
+  else $('knobArc').style.display='none';
+  const [nx,ny] = polar(66,66,36,av);
+  $('knobNeedle').setAttribute('x2', nx); $('knobNeedle').setAttribute('y2', ny);
+  const boosting = KNOB.val > 100;
+  $('knobArc').setAttribute('stroke', boosting ? '#d97706' : 'var(--accent)');
+  $('volVal').textContent = Math.round(KNOB.val);
+  $('boostTag').style.display = boosting ? '' : 'none';
+  $('boostX').textContent = boosting ? ('×' + (1 + (KNOB.val-100)/50).toFixed(1)) : '';
+}
+let volTimer=null;
+function setVol(v, send=true){
+  KNOB.val = Math.max(KNOB.min, Math.min(KNOB.max, v)); drawKnob();
+  if (!send) return;
+  clearTimeout(volTimer);
+  volTimer = setTimeout(async ()=>{
+    try{ await jpost('/api/volume', {level: Math.round(KNOB.val)}); }
+    catch(e){ toast(e.message,'err'); }
+  }, 250);
+}
+(function initKnob(){
+  const el = $('knob');
+  const angleOf = ev => {
+    const r = el.getBoundingClientRect();
+    const x = ev.clientX-(r.left+r.width/2), y = ev.clientY-(r.top+r.height/2);
+    let deg = Math.atan2(y,x)*180/Math.PI + 90;          // 0 = up
+    deg = (deg+360)%360;
+    let rel = deg - KNOB.start; if (rel<0) rel += 360;    // 0..360 from start
+    return rel;
+  };
+  const apply = ev => {
+    const rel = angleOf(ev);
+    if (rel > KNOB.sweep + 30) return;                     // dead zone at bottom
+    const frac = Math.max(0, Math.min(1, rel/KNOB.sweep));
+    setVol(KNOB.min + frac*(KNOB.max-KNOB.min));
+  };
+  el.addEventListener('pointerdown', ev => { el.setPointerCapture(ev.pointerId); apply(ev);
+    const move = e=>apply(e);
+    const up = e=>{ el.removeEventListener('pointermove',move); el.removeEventListener('pointerup',up); };
+    el.addEventListener('pointermove', move); el.addEventListener('pointerup', up);
+  });
+  el.addEventListener('wheel', ev => { ev.preventDefault(); setVol(KNOB.val + (ev.deltaY<0?2:-2)); }, {passive:false});
+  drawKnob();
+})();
+$('btnTone').onclick = async () => {
+  try{ await jpost('/api/play', {source:'asset', name:'test_tone'}); toast('Test tone sent to chest speaker','ok'); }
+  catch(e){ toast(e.message,'err'); }
+};
+
+// dual-speaker sync slider
+let syncTimer=null;
+$('syncSlider').oninput = () => {
+  const ms = +$('syncSlider').value;
+  $('syncVal').textContent = ms + ' ms';
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async ()=>{
+    try{ await jpost('/api/sync', {ms}); }catch(e){ toast(e.message,'err'); }
+  }, 150);
+};
+$('btnSyncTest').onclick = async () => {
+  try{ await jpost('/api/play', {source:'asset', name:'sync_click'}); toast('Sync test — listen to both speakers','ok'); }
+  catch(e){ toast(e.message,'err'); }
+};
+
+/* ---------------- record ---------------- */
+const meterEl = $('meter');
+for (let i=0;i<24;i++){ meterEl.appendChild(document.createElement('i')); }
+const bars = [...meterEl.children];
+
+let rec = {mr:null, chunks:[], stream:null, t0:0, timer:null, ctx:null, raf:null, blob:null};
+function recReset(){
+  $('btnRec').classList.remove('on');
+  $('recPreview').style.display='none'; $('recSaveRow').style.display='none';
+  $('recTime').textContent='0:00.0'; bars.forEach(b=>b.style.height='5px');
+  rec.blob=null;
+}
+$('btnRec').onclick = async () => {
+  if (rec.mr && rec.mr.state==='recording'){ rec.mr.stop(); return; }
+  if (rec.starting) return;                 // ignore double-clicks while mic is being acquired
+  rec.starting = true;
+  try{
+    recReset();
+    rec.stream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){ rec.starting = false; return toast('Microphone access denied','err'); }
+  rec.chunks=[];
+  rec.mr = new MediaRecorder(rec.stream);
+  rec.mr.ondataavailable = e => rec.chunks.push(e.data);
+  rec.mr.onstop = () => {
+    clearInterval(rec.timer); cancelAnimationFrame(rec.raf);
+    rec.stream.getTracks().forEach(t=>t.stop());
+    if (rec.ctx) rec.ctx.close();
+    $('btnRec').classList.remove('on');
+    rec.blob = new Blob(rec.chunks, {type: rec.mr.mimeType||'audio/webm'});
+    const url = URL.createObjectURL(rec.blob);
+    $('recPreview').src = url; $('recPreview').style.display='';
+    $('recSaveRow').style.display='flex';
+    if (!$('recName').value) $('recName').value = 'recording_' + new Date().toISOString().slice(11,19).replaceAll(':','');
+  };
+  // level meter
+  rec.ctx = new (window.AudioContext||window.webkitAudioContext)();
+  const srcNode = rec.ctx.createMediaStreamSource(rec.stream);
+  const an = rec.ctx.createAnalyser(); an.fftSize=64; srcNode.connect(an);
+  const data = new Uint8Array(an.frequencyBinCount);
+  const draw = () => {
+    an.getByteFrequencyData(data);
+    bars.forEach((b,i)=>{ b.style.height = Math.max(5, (data[i]||0)/255*34)+'px'; });
+    rec.raf = requestAnimationFrame(draw);
+  };
+  draw();
+  rec.t0 = performance.now();
+  rec.timer = setInterval(()=>{
+    const s = (performance.now()-rec.t0)/1000;
+    $('recTime').textContent = `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}.${Math.floor((s%1)*10)}`;
+  }, 100);
+  rec.mr.start();
+  $('btnRec').classList.add('on');
+  rec.starting = false;
+};
+$('btnRecSave').onclick = async () => {
+  if (!rec.blob) return;
+  const name = $('recName').value.trim() || 'recording';
+  try{
+    $('btnRecSave').disabled=true;
+    const r = await fetch(`/api/record?name=${encodeURIComponent(name)}`, {method:'POST', body: rec.blob});
+    const j = await r.json(); if (j.error) throw new Error(j.error);
+    toast(`Saved: ${j.name}`,'ok'); recReset(); $('recName').value=''; refresh();
+  }catch(e){ toast(e.message,'err'); }
+  finally{ $('btnRecSave').disabled=false; }
+};
+$('btnRecDiscard').onclick = recReset;
+
+/* ---------------- upload / push all ---------------- */
+$('btnUpload').onclick = () => $('fileInput').click();
+$('fileInput').onchange = async () => {
+  const f = $('fileInput').files[0]; if (!f) return;
+  try{
+    toast(`Converting ${f.name}…`);
+    const r = await fetch(`/api/upload?name=${encodeURIComponent(f.name)}&filename=${encodeURIComponent(f.name)}`,
+                          {method:'POST', body:f});
+    const j = await r.json(); if (j.error) throw new Error(j.error);
+    toast(`Added to library: ${j.name}`,'ok'); refresh();
+  }catch(e){ toast(e.message,'err'); }
+  $('fileInput').value='';
+};
+$('btnPushAll').onclick = async () => {
+  const items = [
+    ...STATE.sounds.library.map(s=>({source:'library', name:s.name})),
+    ...STATE.sounds.generated.map(s=>({source:'generated', name:s.name})),
+  ];
+  if (!items.length) return toast('Library is empty','err');
+  try{
+    $('btnPushAll').disabled=true;
+    const r = await jpost('/api/push', {items});
+    toast(r.message,'ok'); refresh();
+  }catch(e){ toast(e.message,'err'); }
+  finally{ $('btnPushAll').disabled=false; }
+};
+
+/* ---------------- boot ---------------- */
+refresh();
+setInterval(refresh, 15000);
+// sync the knob to the robot's actual volume once at startup
+api('/api/ping').then(r => { if (typeof r.volume === 'number') setVol(r.volume, false); }).catch(()=>{});
+</script>
+</body>
+</html>

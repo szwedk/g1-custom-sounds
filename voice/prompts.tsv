@@ -1,0 +1,17 @@
+id	event	risk	text	voice_id
+P01	startup_ready	L1	Hello. I'm online and ready.
+P02	app_connected	L1	App connected.
+P03	app_disconnected	L1	App disconnected.
+P04	mode_walk	L1	Walking mode enabled.
+P05	mode_stand	L1	Standing up.
+P06	mode_sit	L1	Sitting down.
+P07	mode_damping	L2	Entering damping mode.
+P08	battery_low	L2	Battery low. Please charge me soon.
+P09	battery_critical	L2	Battery critically low. I need to shut down.
+P10	charging_started	L1	Charging.
+P11	charging_full	L1	Battery full.
+P12	obstacle_detected	L2	Obstacle detected.
+P13	fault_generic	L2	A fault has occurred. Please check me.
+P14	overheating	L2	I'm getting too warm. Please let me cool down.
+P15	emergency_stop	L3	Emergency stop activated.
+P16	estop_released	L3	Emergency stop released.
