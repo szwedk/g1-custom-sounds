@@ -8,6 +8,8 @@ stored as files, so this project drives the speaker through the `unitree_sdk2`
 `AudioClient` API instead of replacing anything on disk. See
 [docs/audio-architecture.md](docs/audio-architecture.md) for the details.
 
+![Voice Studio](docs/images/voice-studio.png)
+
 ## Voice Studio
 
 A local web app for working with the robot's audio:
@@ -23,6 +25,8 @@ A local web app for working with the robot's audio:
 
 If a USB audio device is attached, playback goes to both it and the internal
 speaker, with an adjustable sync offset.
+
+![Audio path](docs/images/audio-architecture.png)
 
 ```bash
 cp voice/config.example.sh voice/config.sh   # set ELEVENLABS_API_KEY if using TTS
