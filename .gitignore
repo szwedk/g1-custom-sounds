@@ -27,3 +27,6 @@ __pycache__/
 .claude/
 .vscode/
 .idea/
+
+# Blog / presentation material
+blog-assets/
